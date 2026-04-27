@@ -1,5 +1,5 @@
 """
-THEMIS Round 1 MVP — Demo Dataset Generator
+Aition Round 1 MVP — Demo Dataset Generator
 Generates a synthetic hiring dataset engineered to demonstrate proxy discrimination.
 
 Usage:
