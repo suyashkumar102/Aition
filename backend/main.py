@@ -348,21 +348,54 @@ def build_prompt(
     female_rate = df[df["gender"] == "F"]["hired"].mean() * 100
     std_verdict = "PASSED" if standard.passes_standard_test else "FAILED"
 
-    return f"""You are an AI fairness auditor writing a report for an HR director.
-Write a report under 250 words with exactly three sections:
-"WHAT THE AI WAS DOING WRONG", "WHO WAS AFFECTED", "WHAT SHOULD BE DONE".
-Use plain language. No technical jargon. Be specific. Use the numbers provided.
+    return f"""You are an expert AI fairness auditor writing a comprehensive audit report for an HR director and legal team.
 
-Dataset: {len(df)} hiring records
-Female hire rate: {female_rate:.1f}%
-Male hire rate: {male_rate:.1f}%
-Standard fairness test: {std_verdict}
-Causal audit verdict: {causal.verdict}
-Proxy paths found: {causal.proxy_paths_found}
-  - gender → college_tier → hired (effect: {causal.paths[0].effect})
-  - gender → employment_gap → hired (effect: {causal.paths[1].effect})
-Total causal effect of gender: {causal.total_causal_effect_of_gender}
-Estimated affected candidates: {causal.affected_candidates} qualified female candidates wrongly rejected
+Write a detailed, professional report in **Markdown format** covering all sections below. Be specific, use the exact numbers provided, and write in plain language suitable for non-technical executives. Aim for 600-800 words total.
+
+---
+
+## Audit Data
+
+- Dataset: {len(df)} hiring records
+- Female hire rate: {female_rate:.1f}%
+- Male hire rate: {male_rate:.1f}%
+- Demographic Parity Difference (DPD): {standard.demographic_parity_difference}
+- Standard fairness test (AIF360): {std_verdict}
+- Causal audit verdict: {causal.verdict}
+- Proxy discrimination paths found: {causal.proxy_paths_found}
+  - Path 1: gender → college_tier → hired (group mean effect: {causal.paths[0].effect})
+  - Path 2: gender → employment_gap → hired (group mean effect: {causal.paths[1].effect})
+- Total causal effect of gender on hiring: {causal.total_causal_effect_of_gender}
+- Estimated wrongly rejected female candidates: {causal.affected_candidates}
+
+---
+
+## Required Report Sections
+
+### 1. Executive Summary
+A 3-4 sentence overview of what was found and why it matters.
+
+### 2. What the AI Was Doing Wrong
+Explain clearly how the model passed standard fairness tests yet still discriminated. Describe proxy discrimination in plain terms. Reference the specific proxy variables and their effects.
+
+### 3. Who Was Affected
+Quantify the impact. Name the {causal.affected_candidates} affected candidates. Compare hire rates. Explain the human cost.
+
+### 4. Root Cause Analysis
+Explain why college_tier and employment_gap act as proxies for gender. Describe the causal mechanism (historical bias encoded in training data).
+
+### 5. Risk & Legal Exposure
+Briefly note the legal and reputational risks of proxy discrimination under equal employment laws.
+
+### 6. Recommended Actions
+Provide 4-5 concrete, prioritized action items with clear owners (HR, Legal, Engineering).
+
+### 7. Conclusion
+A closing statement on the importance of causal fairness auditing beyond standard metrics.
+
+---
+
+Format the entire response as clean Markdown with headers, bullet points, and bold key numbers. Do not include any preamble or meta-commentary.
 """
 
 

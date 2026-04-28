@@ -5,6 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Aition — Causal AI Fairness Engine</title>
   <script src="https://cdn.jsdelivr.net/npm/d3@7"></script>
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -163,9 +165,34 @@
       margin-bottom: 1.5rem;
     }
     #report-section h2 { font-size: 1rem; font-weight: 700; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 1rem; }
-    #report-text { white-space: pre-wrap; font-size: 0.9rem; line-height: 1.7; color: #cbd5e1; }
 
-    /* ── Tooltip ─────────────────────────────────────────────────────────── */
+    /* Markdown rendered report */
+    #report-text { font-size: 0.92rem; line-height: 1.8; color: #cbd5e1; }
+    #report-text h1, #report-text h2, #report-text h3 { color: #e2e8f0; margin: 1.2rem 0 0.5rem; font-weight: 700; }
+    #report-text h1 { font-size: 1.4rem; }
+    #report-text h2 { font-size: 1.15rem; border-bottom: 1px solid #334155; padding-bottom: 0.3rem; }
+    #report-text h3 { font-size: 1rem; color: #a78bfa; }
+    #report-text p  { margin-bottom: 0.75rem; }
+    #report-text ul, #report-text ol { padding-left: 1.5rem; margin-bottom: 0.75rem; }
+    #report-text li { margin-bottom: 0.3rem; }
+    #report-text strong { color: #f1f5f9; }
+    #report-text hr { border-color: #334155; margin: 1rem 0; }
+    #report-text code { background: #0f172a; padding: 0.1rem 0.4rem; border-radius: 4px; font-size: 0.85em; }
+
+    #btn-download-pdf {
+      background: #1e293b;
+      border: 1px solid #7C3AED;
+      color: #a78bfa;
+      padding: 0.5rem 1.25rem;
+      border-radius: 6px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.2s;
+      margin-bottom: 1rem;
+      display: inline-block;
+    }
+    #btn-download-pdf:hover { background: #2d1f5e; }
     #tooltip {
       position: fixed;
       background: #1e293b;
@@ -237,7 +264,8 @@
 <!-- Report Card -->
 <div id="report-section">
   <h2>Plain-Language Report</h2>
-  <pre id="report-text"></pre>
+  <button id="btn-download-pdf">⬇ Download as PDF</button>
+  <div id="report-text"></div>
 </div>
 
 <!-- Tooltip -->
@@ -332,7 +360,7 @@ function renderResults(data) {
 
   // Report card
   if (data.plain_language_report) {
-    document.getElementById('report-text').textContent = data.plain_language_report;
+    document.getElementById('report-text').innerHTML = marked.parse(data.plain_language_report);
     block('report-section');
   }
 }
@@ -521,6 +549,27 @@ function renderLegend(svg, width, height) {
       .text(item.label);
   });
 }
+
+// ── PDF Download ──────────────────────────────────────────────────────────────
+document.getElementById('btn-download-pdf').addEventListener('click', () => {
+  const el = document.getElementById('report-text');
+  const opt = {
+    margin:      [10, 15, 10, 15],
+    filename:    'aition-fairness-audit-report.pdf',
+    image:       { type: 'jpeg', quality: 0.98 },
+    html2canvas: { scale: 2, backgroundColor: '#ffffff' },
+    jsPDF:       { unit: 'mm', format: 'a4', orientation: 'portrait' },
+  };
+  // Clone with white background for PDF
+  const clone = el.cloneNode(true);
+  clone.style.color = '#111';
+  clone.style.background = '#fff';
+  clone.style.padding = '10px';
+  clone.querySelectorAll('h1,h2,h3').forEach(h => h.style.color = '#111');
+  clone.querySelectorAll('strong').forEach(s => s.style.color = '#111');
+  clone.querySelectorAll('li,p').forEach(e => e.style.color = '#333');
+  html2pdf().set(opt).from(clone).save();
+});
 
 // ── Event Wiring ──────────────────────────────────────────────────────────────
 document.getElementById('btn-demo').addEventListener('click', () => {
