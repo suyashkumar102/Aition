@@ -2,7 +2,7 @@
  * THEMIS API client — all calls to the FastAPI backend.
  * Base URL reads from REACT_APP_API_URL env var, falls back to localhost:8000.
  */
-const BASE = process.env.REACT_APP_API_URL || "";
+const BASE = process.env.REACT_APP_API_URL || "https://aition.onrender.com";
 
 /**
  * Run a full causal audit.

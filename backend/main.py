@@ -143,6 +143,7 @@ app = FastAPI(title="Aition Causal Fairness Engine")
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
+    allow_credentials=False,
     allow_methods=["*"],
     allow_headers=["*"],
 )
@@ -220,7 +221,8 @@ async def load_dataset(file: Optional[UploadFile]) -> pd.DataFrame:
     Raises HTTPException(422) on schema/size violations.
     """
     if file is None:
-        df = pd.read_csv("data/demo_hiring_dataset.csv")
+        base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+        df = pd.read_csv(os.path.join(base_dir, "data", "demo_hiring_dataset.csv"))
     else:
         contents = await file.read()
         df = pd.read_csv(io.BytesIO(contents))
