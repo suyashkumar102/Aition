@@ -103,7 +103,7 @@ class AuditResponse:
 
 # ── FastAPI App ───────────────────────────────────────────────────────────────
 
-app = FastAPI(title="THEMIS Causal Fairness Engine")
+app = FastAPI(title="Aition Causal Fairness Engine")
 
 app.add_middleware(
     CORSMiddleware,
@@ -375,7 +375,7 @@ def fallback_report(
     male_rate = df[df["gender"] == "M"]["hired"].mean() * 100
     female_rate = df[df["gender"] == "F"]["hired"].mean() * 100
 
-    return f"""THEMIS Causal Audit Report (Auto-generated)
+    return f"""Aition Causal Audit Report (Auto-generated)
 
 WHAT THE AI WAS DOING WRONG
 The hiring model uses college_tier and employment_gap as proxy variables \
