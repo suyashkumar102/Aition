@@ -10,6 +10,9 @@ import os
 from dataclasses import dataclass, field, asdict
 from typing import Any, Optional
 
+from dotenv import load_dotenv
+load_dotenv()  # loads .env from project root automatically
+
 import numpy as np
 import pandas as pd
 from aif360.datasets import BinaryLabelDataset
@@ -394,25 +397,25 @@ def generate_report(
     causal: CausalAuditResult,
 ) -> tuple[str, Optional[str]]:
     """
-    Build Gemini prompt, call gemini-1.5-pro (temperature=0.2, timeout=30s).
+    Build Gemini prompt, call gemini-2.0-flash (temperature=0.2, timeout=30s).
     Returns (report_text, report_error) — report_error is None on success.
     """
-    import google.generativeai as genai
+    from google import genai
+    from google.genai import types as genai_types
 
     prompt = build_prompt(df, standard, causal)
     try:
-        genai.configure(api_key=GEMINI_API_KEY)
-        model = genai.GenerativeModel("gemini-1.5-pro")
-        response = model.generate_content(
-            prompt,
-            generation_config=genai.types.GenerationConfig(temperature=0.2),
-            request_options={"timeout": 30},
+        client = genai.Client(api_key=GEMINI_API_KEY)
+        response = client.models.generate_content(
+            model="gemini-2.5-flash",
+            contents=prompt,
+            config=genai_types.GenerateContentConfig(temperature=0.2),
         )
         report_text = response.text
         logger.info("Report generated")
         return report_text, None
     except Exception as exc:
-        logger.info("Report generation failed, using fallback")
+        logger.error("Report generation failed, using fallback: %s", exc)
         return fallback_report(standard, causal, df), str(exc)
 
 
