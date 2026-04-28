@@ -75,7 +75,9 @@ def generate_dataset(seed: int = 42, n: int = 2000) -> pd.DataFrame:
     )
     noise = np.random.normal(loc=0.0, scale=0.05, size=n)
     score_noisy = score + noise
-    hired = (score_noisy >= 0.55).astype(int)
+    # Threshold 0.43 yields DPD ~0.08 (passes the 0.10 standard fairness threshold)
+    # while preserving the proxy discrimination signal in college_tier and employment_gap
+    hired = (score_noisy >= 0.43).astype(int)
 
     # ── Assemble DataFrame ────────────────────────────────────────────────────
     df = pd.DataFrame({
