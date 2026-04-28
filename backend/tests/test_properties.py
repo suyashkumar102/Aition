@@ -15,7 +15,7 @@ from fastapi import HTTPException
 
 from backend.main import (
     validate_schema,
-    encode_gender,
+    encode_age_group,
     compute_affected_candidates,
     build_graph_data,
     convert_numpy_types,
@@ -62,21 +62,21 @@ def test_p2_schema_rejects_undersized_datasets(n):
 # ── Property 3: Gender encoding correctness ───────────────────────────────────
 # Validates: Requirements 2.7, 3.2
 
-@given(st.lists(st.sampled_from(["M", "F"]), min_size=1))
+@given(st.lists(st.sampled_from(["Young", "Senior"]), min_size=1))
 @settings(max_examples=100)
-def test_p3_gender_encoding_correctness(genders):
-    """Every 'M' maps to 1 and every 'F' maps to 0; other columns unchanged."""
-    df = pd.DataFrame({"gender": genders, "score": list(range(len(genders)))})
-    result = encode_gender(df)
-    for orig, encoded in zip(genders, result["gender"]):
-        if orig == "M":
+def test_p3_age_group_encoding_correctness(age_groups):
+    """Every 'Young' maps to 1 and every 'Senior' maps to 0; other columns unchanged."""
+    df = pd.DataFrame({"age_group": age_groups, "score": list(range(len(age_groups)))})
+    result = encode_age_group(df)
+    for orig, encoded in zip(age_groups, result["age_group"]):
+        if orig == "Young":
             assert encoded == 1
         else:
             assert encoded == 0
     # Other columns unchanged
     assert list(result["score"]) == list(df["score"])
     # Original not mutated
-    assert list(df["gender"]) == genders
+    assert list(df["age_group"]) == age_groups
 
 
 # ── Property 4: Fairness threshold classification ─────────────────────────────
@@ -90,6 +90,7 @@ def test_p4_fairness_threshold_classification(dpd):
     verdict = "FAIR" if passes else "BIASED"
     result = StandardAuditResult(
         demographic_parity_difference=dpd,
+        ses_parity_difference=0.05,
         passes_standard_test=passes,
         verdict=verdict,
     )
@@ -119,7 +120,7 @@ def test_p5_dpd_rounding_idempotence(x):
 def test_p7_proxy_path_count_invariant(n_paths):
     """proxy_paths_found always equals len(paths)."""
     paths = [
-        ProxyPath(path=["gender", "x", "hired"], type="proxy", effect=0.1, description="test")
+        ProxyPath(path=["age_group", "x", "hired"], type="proxy", effect=0.1, description="test")
         for _ in range(n_paths)
     ]
     result = CausalAuditResult(
@@ -167,37 +168,41 @@ def test_p9_affected_candidates_formula(male_rate, female_rate, n_female):
 @given(st.integers(min_value=0, max_value=2000))
 @settings(max_examples=100)
 def test_p10_fallback_report_contains_key_numbers(affected_candidates):
-    """Fallback report is non-empty and contains affected_candidates, college_tier, employment_gap."""
+    """Fallback report is non-empty and contains affected_candidates and employment_gap."""
     standard = StandardAuditResult(
         demographic_parity_difference=0.08,
+        ses_parity_difference=0.07,
         passes_standard_test=True,
         verdict="FAIR",
     )
     paths = [
-        ProxyPath(path=["gender", "college_tier", "hired"], type="proxy", effect=-0.14,
-                  description="Gender correlates with college tier in historical data"),
-        ProxyPath(path=["gender", "employment_gap", "hired"], type="proxy", effect=0.25,
-                  description="Gender correlates with employment gaps in historical data"),
+        ProxyPath(path=["age_group", "college_graduation_year_gap", "hired"], type="proxy", effect=0.34,
+                  description="Senior candidates have older degrees"),
+        ProxyPath(path=["age_group", "employment_gap", "hired"], type="proxy", effect=0.25,
+                  description="Senior candidates more likely to have career breaks"),
+        ProxyPath(path=["socioeconomic_group", "neighborhood_quality", "hired"], type="proxy", effect=0.42,
+                  description="Low-SES candidates from lower-quality neighbourhoods"),
     ]
     causal = CausalAuditResult(
-        proxy_paths_found=2,
+        proxy_paths_found=3,
         paths=paths,
         total_causal_effect_of_gender=0.087,
         verdict="PROXY DISCRIMINATION DETECTED",
         affected_candidates=affected_candidates,
     )
     df = pd.DataFrame({
-        "gender": ["M"] * 50 + ["F"] * 50,
-        "hired": [1] * 100,
-        "experience_years": [5] * 100,
-        "test_score": [70.0] * 100,
-        "college_tier": [1] * 100,
-        "employment_gap": [0] * 100,
+        "age_group":                   ["Young"] * 50 + ["Senior"] * 50,
+        "socioeconomic_group":         ["High"] * 50 + ["Low"] * 50,
+        "hired":                       [1] * 100,
+        "experience_years":            [5] * 100,
+        "test_score":                  [70.0] * 100,
+        "college_graduation_year_gap": [0] * 100,
+        "employment_gap":              [0] * 100,
+        "neighborhood_quality":        [1] * 100,
     })
     report = fallback_report(standard, causal, df)
     assert len(report) > 0
     assert str(affected_candidates) in report
-    assert "college_tier" in report
     assert "employment_gap" in report
 
 
@@ -214,3 +219,117 @@ def test_p11_numpy_type_conversion_json_serializable(val):
     result = convert_numpy_types(val)
     assert isinstance(result, (float, int))
     json.dumps(result)  # must not raise
+
+
+# ── Property 12: Bias index is non-negative ───────────────────────────────────
+# Validates: Requirements 6.1
+
+@given(st.floats(min_value=-1.0, max_value=1.0, allow_nan=False))
+@settings(max_examples=100)
+def test_p12_bias_index_non_negative(dpd):
+    """compute_bias_index always returns a non-negative value."""
+    from backend.main import compute_bias_index
+    standard = StandardAuditResult(
+        demographic_parity_difference=dpd,
+        ses_parity_difference=0.05,
+        passes_standard_test=abs(dpd) < 0.10,
+        verdict="FAIR" if abs(dpd) < 0.10 else "BIASED",
+    )
+    result = compute_bias_index(standard)
+    assert result >= 0.0
+
+
+# ── Property 13: Bias index equals abs(DPD) rounded to 4 dp ──────────────────
+# Validates: Requirements 6.1
+
+@given(st.floats(min_value=-1.0, max_value=1.0, allow_nan=False))
+@settings(max_examples=100)
+def test_p13_bias_index_equals_abs_dpd(dpd):
+    """compute_bias_index(standard) == max(abs(dpd_age), abs(dpd_ses)) rounded to 4dp."""
+    from backend.main import compute_bias_index
+    standard = StandardAuditResult(
+        demographic_parity_difference=dpd,
+        ses_parity_difference=0.05,
+        passes_standard_test=abs(dpd) < 0.10,
+        verdict="FAIR" if abs(dpd) < 0.10 else "BIASED",
+    )
+    result = compute_bias_index(standard)
+    assert result == round(max(abs(dpd), 0.05), 4)
+
+
+# ── Property 14: Impossibility surface frontier_points length == 17 ───────────
+# Validates: Requirements 7.7
+
+from backend.main import compute_impossibility_surface, run_surgical_debiasing, ImpossibilitySurface, DebiasingResult
+
+_DEMO_DF = None
+
+def _get_demo_df():
+    global _DEMO_DF
+    if _DEMO_DF is None:
+        _DEMO_DF = pd.read_csv("data/demo_hiring_dataset.csv")
+    return _DEMO_DF
+
+
+@given(st.data())
+@settings(max_examples=10)
+def test_p14_impossibility_surface_frontier_length(data):
+    """frontier_points length always equals 17 (number of threshold steps 0.1→0.9 in 0.05 steps).
+
+    **Validates: Requirements 7.7**
+    """
+    df = _get_demo_df()
+    surface = compute_impossibility_surface(df)
+    assert len(surface.frontier_points) == 17
+
+
+# ── Property 15: Debiasing always reduces bias_index ─────────────────────────
+# Validates: Requirements 8.5
+
+@given(st.data())
+@settings(max_examples=10)
+def test_p15_debiasing_reduces_bias_index(data):
+    """bias_index_after <= bias_index_before after surgical debiasing.
+
+    **Validates: Requirements 8.5**
+    """
+    df = _get_demo_df()
+    paths = [
+        ProxyPath(path=["age_group", "college_graduation_year_gap", "hired"], type="proxy", effect=0.34,
+                  description="Senior candidates have older degrees"),
+    ]
+    causal = CausalAuditResult(
+        proxy_paths_found=1,
+        paths=paths,
+        total_causal_effect_of_gender=0.05,
+        verdict="PROXY DISCRIMINATION DETECTED",
+        affected_candidates=10,
+    )
+    result = run_surgical_debiasing(df, causal, "demographic_parity")
+    assert result.bias_index_after <= result.bias_index_before
+
+
+# ── Property 16: Debiasing accuracy_cost_percent is non-negative ─────────────
+# Validates: Requirements 8.5
+
+@given(st.data())
+@settings(max_examples=10)
+def test_p16_debiasing_accuracy_cost_non_negative(data):
+    """accuracy_cost_percent >= 0 after surgical debiasing.
+
+    **Validates: Requirements 8.5**
+    """
+    df = _get_demo_df()
+    paths = [
+        ProxyPath(path=["age_group", "college_graduation_year_gap", "hired"], type="proxy", effect=0.34,
+                  description="Senior candidates have older degrees"),
+    ]
+    causal = CausalAuditResult(
+        proxy_paths_found=1,
+        paths=paths,
+        total_causal_effect_of_gender=0.05,
+        verdict="PROXY DISCRIMINATION DETECTED",
+        affected_candidates=10,
+    )
+    result = run_surgical_debiasing(df, causal, "demographic_parity")
+    assert result.accuracy_cost_percent >= 0

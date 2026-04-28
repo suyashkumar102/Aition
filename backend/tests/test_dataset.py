@@ -8,18 +8,20 @@ import pytest
 os.environ.setdefault("GEMINI_API_KEY", "test-key")
 
 from fastapi import HTTPException
-from backend.main import validate_schema, encode_gender, REQUIRED_COLUMNS
+from backend.main import validate_schema, encode_age_group, REQUIRED_COLUMNS
 
 
 def _make_valid_df(n: int = 100) -> pd.DataFrame:
     """Return a minimal valid dataframe with all required columns."""
     return pd.DataFrame({
-        "gender": ["M"] * (n // 2) + ["F"] * (n - n // 2),
-        "experience_years": [5] * n,
-        "test_score": [70.0] * n,
-        "college_tier": [1] * n,
-        "employment_gap": [0] * n,
-        "hired": [1] * n,
+        "age_group":                   ["Young"] * (n // 2) + ["Senior"] * (n - n // 2),
+        "socioeconomic_group":         ["High"] * (n // 2) + ["Low"] * (n - n // 2),
+        "experience_years":            [5] * n,
+        "test_score":                  [70.0] * n,
+        "college_graduation_year_gap": [0] * n,
+        "employment_gap":              [0] * n,
+        "neighborhood_quality":        [1] * n,
+        "hired":                       [1] * n,
     })
 
 
@@ -46,14 +48,14 @@ def test_validate_schema_passes_for_valid_100_row_df():
     validate_schema(df)
 
 
-def test_encode_gender_maps_m_to_1_and_f_to_0():
+def test_encode_age_group_maps_young_to_1_and_senior_to_0():
     df = pd.DataFrame({
-        "gender": ["M", "F", "M"],
+        "age_group": ["Young", "Senior", "Young"],
         "score": [80, 70, 90],
     })
-    result = encode_gender(df)
-    assert list(result["gender"]) == [1, 0, 1]
+    result = encode_age_group(df)
+    assert list(result["age_group"]) == [1, 0, 1]
     # Other columns unchanged
     assert list(result["score"]) == [80, 70, 90]
     # Original df not mutated
-    assert list(df["gender"]) == ["M", "F", "M"]
+    assert list(df["age_group"]) == ["Young", "Senior", "Young"]

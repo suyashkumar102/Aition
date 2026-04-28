@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html>
+<head><title>Test</title></head>
+<body>
+<button id="test">Test Audit</button>
+<pre id="output"></pre>
+<script>
+document.getElementById('test').onclick = async () => {
+  try {
+    const res = await fetch('http://localhost:8000/audit', { method: 'POST', body: new FormData() });
+    const data = await res.json();
+    document.getElementById('output').textContent = JSON.stringify(data, null, 2);
+    console.log('impossibility_surface.frontier_points:', data.impossibility_surface.frontier_points);
+    console.log('Is array?', Array.isArray(data.impossibility_surface.frontier_points));
+    console.log('First point:', data.impossibility_surface.frontier_points[0]);
+  } catch(e) {
+    document.getElementById('output').textContent = 'Error: ' + e.message;
+  }
+};
+</script>
+</body>
+</html>

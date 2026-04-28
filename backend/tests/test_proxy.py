@@ -11,32 +11,38 @@ os.environ.setdefault("GEMINI_API_KEY", "test-key")
 from backend.main import detect_proxy_paths, compute_affected_candidates, build_graph_data, convert_numpy_types
 
 
-def test_detect_proxy_paths_returns_exactly_2_paths():
+def test_detect_proxy_paths_returns_exactly_3_paths():
     df = pd.read_csv("data/demo_hiring_dataset.csv")
     paths = detect_proxy_paths(df)
-    assert len(paths) == 2
+    assert len(paths) == 3
     path_vars = [p.path[1] for p in paths]
-    assert "college_tier" in path_vars
+    assert "college_graduation_year_gap" in path_vars
     assert "employment_gap" in path_vars
+    assert "neighborhood_quality" in path_vars
 
 
 def test_compute_affected_candidates_in_expected_range():
     df = pd.read_csv("data/demo_hiring_dataset.csv")
     affected = compute_affected_candidates(df)
-    # With DPD ~0.08 and ~1000 females, expect a positive value
+    # With DPD ~0.10 and ~1000 seniors, expect a positive value
     assert isinstance(affected, int)
     assert affected >= 0
 
 
-def test_build_graph_data_returns_6_nodes_and_6_edges():
+def test_build_graph_data_returns_8_nodes_and_8_edges():
     graph = build_graph_data()
-    assert len(graph.nodes) == 6
-    assert len(graph.edges) == 6
+    assert len(graph.nodes) == 8
+    assert len(graph.edges) == 8
     node_types = {n.type for n in graph.nodes}
     assert "protected" in node_types
     assert "proxy" in node_types
     assert "legitimate" in node_types
     assert "outcome" in node_types
+    # Both protected attributes present
+    node_ids = {n.id for n in graph.nodes}
+    assert "age_group" in node_ids
+    assert "socioeconomic_group" in node_ids
+    assert "neighborhood_quality" in node_ids
     edge_types = {e.type for e in graph.edges}
     assert "proxy" in edge_types
     assert "legitimate" in edge_types
