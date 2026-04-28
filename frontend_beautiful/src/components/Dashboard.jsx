@@ -98,19 +98,25 @@ export default function Dashboard() {
     <div className="app-bg" style={{ display: "flex", minHeight: "100vh" }}>
       <Sidebar active={active} onChange={setActive} />
 
-      <main className="main-area" style={{ flex: 1, padding: "32px 40px 60px", maxWidth: "100%", minWidth: 0 }}>
+      <main className="main-area workbench-main" style={{ flex: 1, padding: "32px 40px 60px", maxWidth: "100%", minWidth: 0 }}>
 
         {/* Header */}
-        <div className="header-flex fade-up" style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 28, gap: 24 }}>
+        <div className="header-flex dashboard-hero fade-up" style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: 24 }}>
           <div>
+            <div className="eyebrow">Unbiased AI Decision Track</div>
             <h1 data-testid="page-title" style={{ fontSize: 34, fontWeight: 700, margin: 0, color: "#ffffff", letterSpacing: -0.6 }}>
               Causal AI Fairness Engine
             </h1>
             <p style={{ margin: "8px 0 0", color: "#8a8fa8", fontSize: 15 }}>
               Detecting hidden bias. Enabling fairer outcomes.
             </p>
+            <div className="hero-meta" aria-label="Audit capabilities">
+              <span className="meta-pill">Causal graph audit</span>
+              <span className="meta-pill">Proxy path detection</span>
+              <span className="meta-pill">Fairness tradeoff surface</span>
+            </div>
           </div>
-          <div style={{ display: "flex", gap: 12, flexShrink: 0 }}>
+          <div className="hero-actions">
             <input ref={fileInputRef} type="file" accept=".csv" style={{ display: "none" }} onChange={handleFileChange} />
             <button data-testid="upload-csv-btn" className="btn btn-secondary" onClick={() => fileInputRef.current?.click()} disabled={loading}>
               <Upload size={16} />
@@ -132,19 +138,33 @@ export default function Dashboard() {
 
         {/* Loading state */}
         {loading && (
-          <div style={{ textAlign: "center", padding: "80px 0", color: "#8a8fa8" }}>
-            <Loader2 size={40} style={{ animation: "spin 1s linear infinite", margin: "0 auto 16px" }} />
-            <div style={{ fontSize: 16 }}>Running causal audit…</div>
-            <div style={{ fontSize: 13, marginTop: 8 }}>Building causal graph, computing fairness metrics</div>
+          <div className="state-panel fade-up" data-testid="loading-state">
+            <div className="state-copy">
+              <div className="state-icon">
+                <Loader2 size={28} className="spin" />
+              </div>
+              <h2>Running causal audit</h2>
+              <p>Building the causal graph, comparing statistical fairness, and preparing the fairness tradeoff surface.</p>
+              <div className="loading-card">
+                <Loader2 size={16} className="spin" />
+                Processing dataset
+              </div>
+            </div>
+            <AuditPreview active />
           </div>
         )}
 
         {/* Empty state */}
         {!loading && !auditData && !error && (
-          <div style={{ textAlign: "center", padding: "80px 0", color: "#8a8fa8" }}>
-            <Database size={48} style={{ margin: "0 auto 20px", opacity: 0.4 }} />
-            <div style={{ fontSize: 18, fontWeight: 600, color: "#c7cae0", marginBottom: 8 }}>No audit loaded</div>
-            <div style={{ fontSize: 14 }}>Click "Use Demo Dataset" to run a causal fairness audit, or upload your own CSV.</div>
+          <div className="state-panel fade-up" data-testid="empty-state">
+            <div className="state-copy">
+              <div className="state-icon">
+                <Database size={28} />
+              </div>
+              <h2>No audit loaded</h2>
+              <p>Start with the demo dataset or upload a CSV to populate the fairness dashboard.</p>
+            </div>
+            <AuditPreview />
           </div>
         )}
 
@@ -462,6 +482,29 @@ export default function Dashboard() {
 }
 
 // ── sub-components ────────────────────────────────────────────────────────────
+
+function AuditPreview({ active = false }) {
+  const rows = [
+    { label: "Graph", width: active ? "86%" : "72%", color: "#2dd4bf" },
+    { label: "Parity", width: active ? "64%" : "58%", color: "#38bdf8" },
+    { label: "Proxy", width: active ? "78%" : "66%", color: "#fb7185" },
+    { label: "Report", width: active ? "52%" : "44%", color: "#8b5cf6" },
+  ];
+
+  return (
+    <div className="audit-preview" aria-hidden="true">
+      {rows.map(row => (
+        <div className="preview-row" key={row.label}>
+          <span className="preview-dot" style={{ background: row.color }} />
+          <div className="preview-bar">
+            <span style={{ width: row.width, background: `linear-gradient(90deg, ${row.color}99, ${row.color})` }} />
+          </div>
+          <span className="preview-label">{row.label}</span>
+        </div>
+      ))}
+    </div>
+  );
+}
 
 function Legend({ color, label }) {
   return (

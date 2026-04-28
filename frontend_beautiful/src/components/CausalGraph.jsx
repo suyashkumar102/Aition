@@ -16,10 +16,10 @@ const ICON_MAP = {
 
 // Color map by node type
 const TYPE_COLORS = {
-  protected:  { fill: "#5a3bff", stroke: "#a48bff", edge: "#7c5cff" },
-  proxy:      { fill: "#dc2626", stroke: "#ff8a8a", edge: "#ef4444" },
-  legitimate: { fill: "#059669", stroke: "#6ee7b7", edge: "#10b981" },
-  outcome:    { fill: "#3a3f55", stroke: "#9aa0b9", edge: "#9aa0b9" },
+  protected:  { fill: "#6d28d9", stroke: "#c4b5fd", edge: "#8b5cf6" },
+  proxy:      { fill: "#be123c", stroke: "#fda4af", edge: "#fb7185" },
+  legitimate: { fill: "#0f766e", stroke: "#5eead4", edge: "#2dd4bf" },
+  outcome:    { fill: "#334155", stroke: "#cbd5e1", edge: "#94a3b8" },
 };
 
 // Static fallback layout positions (viewBox 900 x 420)
@@ -96,7 +96,7 @@ export default function CausalGraph({ graphData }) {
     >
       <defs>
         {["proxy", "legitimate", "protected", "outcome"].map(t => {
-          const color = t === "proxy" ? "#ef4444" : t === "legitimate" ? "#10b981" : t === "protected" ? "#7c5cff" : "#9aa0b9";
+          const color = t === "proxy" ? "#fb7185" : t === "legitimate" ? "#2dd4bf" : t === "protected" ? "#8b5cf6" : "#94a3b8";
           return (
             <marker key={t} id={`arrow-${t}`} viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
               <path d="M 0 0 L 10 5 L 0 10 z" fill={color} />
@@ -141,7 +141,7 @@ export default function CausalGraph({ graphData }) {
             />
             <text x={mx} y={my + 4} textAnchor="middle" fontSize="11"
               fontFamily="'JetBrains Mono', monospace"
-              fill={isProxy ? "#ff9a9a" : "#7ee2c2"}
+              fill={isProxy ? "#fecdd3" : "#99f6e4"}
             >
               {typeof e.strength === "number" ? e.strength.toFixed(2) : e.strength}
             </text>

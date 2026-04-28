@@ -67,7 +67,7 @@ export default function Sidebar({ active = "overview", onChange = () => {} }) {
       <div className="mini-card" data-testid="sidebar-tagline">
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-end", gap: 8 }}>
           <div>
-            <div style={{ color: "#b9a4ff", fontWeight: 600, fontSize: 13.5, lineHeight: 1.35 }}>
+            <div style={{ color: "#99f6e4", fontWeight: 600, fontSize: 13.5, lineHeight: 1.35 }}>
               Causal AI for<br />Fair Decisions
             </div>
             <div style={{ marginTop: 10, color: "#8a8fa8", fontSize: 11.5, lineHeight: 1.5 }}>
@@ -79,12 +79,12 @@ export default function Sidebar({ active = "overview", onChange = () => {} }) {
               width: 30,
               height: 30,
               borderRadius: 8,
-              background: "rgba(124, 92, 255, 0.16)",
-              border: "1px solid rgba(124, 92, 255, 0.3)",
+              background: "rgba(45, 212, 191, 0.14)",
+              border: "1px solid rgba(45, 212, 191, 0.26)",
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
-              color: "#b9a4ff",
+              color: "#99f6e4",
             }}
           >
             <ShieldHalf size={15} />

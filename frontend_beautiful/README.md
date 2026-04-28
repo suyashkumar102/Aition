@@ -1,70 +1,48 @@
-# Getting Started with Create React App
+# Aition Frontend
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+React dashboard for the Aition causal AI fairness engine.
 
-## Available Scripts
+The frontend is intentionally a single focused workbench: upload or run an audit, compare standard fairness against causal fairness, inspect the causal graph, review proxy variables, and apply the selected fairness definition to the debiasing step.
 
-In the project directory, you can run:
+## Stack
 
-### `npm start`
+- React 18
+- CRACO / Create React App
+- Lucide React icons
+- Custom SVG causal graph
+- CSS-only visual system in `src/App.css`
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+## Local Development
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+```bash
+npm install
+npm start
+```
 
-### `npm test`
+The app runs on `http://localhost:3000` and proxies API calls to `http://localhost:8000` in development.
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+To point the frontend at another backend:
 
-### `npm run build`
+```bash
+REACT_APP_API_URL=https://your-api.example.com npm start
+```
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+## Production Build
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+```bash
+npm run build
+```
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+The compiled app is emitted to `build/`.
 
-### `npm run eject`
+## Frontend Structure
 
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
+- `src/components/Dashboard.jsx` - main audit workbench and UI states
+- `src/components/CausalGraph.jsx` - SVG graph renderer for causal paths
+- `src/components/Sidebar.jsx` - application navigation shell
+- `src/api.js` - `runAudit` and `runDebias` API calls
+- `src/App.css` - dashboard visual system, responsive rules, and animations
 
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+## Design Notes
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
-
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
-
-## Learn More
-
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
-
-To learn React, check out the [React documentation](https://reactjs.org/).
-
-### Code Splitting
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
-
-### Analyzing the Bundle Size
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
-
-### Making a Progressive Web App
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
-
-### Advanced Configuration
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
-
-### Deployment
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
-
-### `npm run build` fails to minify
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+The interface uses a dark professional command-center treatment with high-contrast result cards, color-coded graph semantics, compact controls, and responsive layouts tuned for live demo review.

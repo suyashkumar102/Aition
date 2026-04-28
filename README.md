@@ -2,9 +2,16 @@
 
 > "Your hiring model just passed every standard fairness test. It rejected 81 qualified candidates anyway."
 
-Aition is an AI fairness auditing system that finds discrimination that standard tools miss — because it thinks causally, not statistically. While every other fairness dashboard measures whether output rates are equal across groups, Aition builds a causal graph of how a model actually makes decisions and traces the hidden proxy paths that carry bias invisibly through neutral-looking variables.
+Aition is an AI fairness auditing system that finds discrimination that standard tools miss — because it thinks causally, not statistically. While standard fairness dashboards mainly ask whether output rates are equal across groups, Aition reconstructs the decision pathway, exposes hidden proxy variables, and shows how apparently neutral features can still carry protected-attribute influence into a model outcome.
 
 Built for Google Solution Challenge 2026 India | Unbiased AI Decision Track.
+
+### Why Aition Stands Out
+
+- **Causal, not just statistical:** compares AIF360 demographic parity with DoWhy causal path analysis so the demo shows both the conventional verdict and the deeper structural verdict.
+- **Explains the failure mode:** turns abstract proxy discrimination into visible paths such as `age_group → employment_gap → hired`.
+- **Decision-ready workflow:** pairs detection with an impossibility-surface tradeoff view, surgical debiasing, and a plain-language report for non-technical stakeholders.
+- **Designed for high-stakes review:** presents audit evidence in a polished dashboard that a compliance, HR, or ML governance team can scan quickly during a live review.
 
 ---
 
@@ -50,13 +57,13 @@ Aition is the first tool to make this tension interactive and actionable. It for
 
 2. **Proxy Path Detection** — Applies the backdoor criterion to identify direct discrimination paths (protected attribute → outcome) and indirect proxy paths (protected attribute → intermediate variable → outcome). Computes do-calculus causal effect estimates: P(Y | do(A=a)) vs P(Y | do(A=a')).
 
-3. **Standard Fairness Benchmarking** — Runs AIF360 demographic parity difference for all protected attributes. Shows the model passing standard tests. Then shows what Aition found that standard tests missed.
+3. **Standard Fairness Benchmarking** — Runs AIF360 demographic parity difference for all protected attributes and preserves the familiar baseline verdict. This makes the contrast explicit: the model can pass a standard audit while still failing a causal audit.
 
-4. **Impossibility Surface** — Trains a logistic regression baseline, sweeps decision thresholds from 0.1 to 0.9, and computes the Pareto frontier between demographic parity difference and equalized odds difference. Renders this as an interactive slider so organisations can make an explicit, informed fairness definition choice.
+4. **Impossibility Surface** — Trains a logistic regression baseline, sweeps decision thresholds from 0.1 to 0.9, and computes the Pareto frontier between demographic parity difference and equalized odds difference. Renders this as an interactive slider so organisations can see the fairness tradeoff instead of receiving a single unexplained score.
 
 5. **Surgical Debiasing** — Removes proxy variables from the feature set, reweights samples to equalise proxy variable distributions across protected groups, and retrains only the affected model components. Measures bias reduction and accuracy cost before and after.
 
-6. **Plain Language Reporting** — Generates a structured audit report via Gemini 2.5 Flash with two audiences: a technical report for ML engineers (causal paths, effect sizes, correction strategies) and a plain language report for HR directors and compliance officers (what the AI was doing wrong, who was affected, what to do about it).
+6. **Plain Language Reporting** — Generates a structured audit report via Gemini 2.5 Flash with two audiences: a technical report for ML engineers (causal paths, effect sizes, correction strategies) and a plain language report for HR directors and compliance officers (what the AI was doing wrong, who was affected, and what action to take next).
 
 ---
 
@@ -323,6 +330,7 @@ Run surgical debiasing on a cached audit result.
 
 ### Dashboard (`src/components/Dashboard.jsx`)
 The main view. Renders all audit results in a single-page layout:
+- Modern audit workbench shell with refined empty, loading, and result states
 - Standard vs causal fairness verdict cards (the core visual argument: green FAIR on the left, red NOT FAIR on the right)
 - Alert banner with affected candidate count
 - Key insights panel (proxy paths, top proxy variables, recommendation)
@@ -340,7 +348,7 @@ Static SVG causal graph rendered at 900×400 viewBox. Nodes are colour-coded by 
 Edges carry causal strength labels. Red edges pulse to draw attention to the discrimination paths. Arrow markers are defined per colour via SVG `<defs>`.
 
 ### Sidebar (`src/components/Sidebar.jsx`)
-Navigation sidebar with section links: Overview, Causal Graph, Fairness Metrics, Debiasing, Report.
+Navigation sidebar with section links for the audit workflow, compact brand treatment, and a governance-oriented summary panel.
 
 ### API Client (`src/api.js`)
 Two functions: `runAudit(file)` and `runDebias(auditId, fairnessDefinition)`. Base URL reads from `REACT_APP_API_URL` env var, falls back to `http://localhost:8000`.
