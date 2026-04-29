@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>Aition — Tech Stack</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet">
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: #ffffff;
+    font-family: 'Inter', sans-serif;
+    padding: 40px;
+    width: 1200px;
+  }
+  h1 {
+    font-size: 28px; font-weight: 700; color: #0d0d0d;
+    margin-bottom: 6px; letter-spacing: -0.5px;
+  }
+  .subtitle { font-size: 14px; color: #6b7280; margin-bottom: 36px; }
+
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 20px;
+  }
+
+  .category {
+    border-radius: 14px;
+    overflow: hidden;
+    border: 1px solid #e5e7eb;
+  }
+
+  .cat-header {
+    padding: 14px 18px;
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 0.8px;
+    text-transform: uppercase;
+    color: #fff;
+  }
+
+  .cat-body { padding: 14px; display: flex; flex-direction: column; gap: 10px; }
+
+  .chip {
+    background: #f9fafb;
+    border: 1px solid #e5e7eb;
+    border-radius: 10px;
+    padding: 10px 14px;
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+  }
+
+  .chip-icon {
+    width: 36px; height: 36px; border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 18px; flex-shrink: 0;
+  }
+
+  .chip-name {
+    font-size: 13px; font-weight: 600; color: #111827;
+    font-family: 'JetBrains Mono', monospace;
+  }
+  .chip-desc { font-size: 11.5px; color: #6b7280; margin-top: 2px; line-height: 1.4; }
+
+  /* category colours */
+  .backend  .cat-header { background: #5a3bff; }
+  .causal   .cat-header { background: #dc2626; }
+  .fairness .cat-header { background: #059669; }
+  .ai       .cat-header { background: #d97706; }
+  .frontend .cat-header { background: #0284c7; }
+  .infra    .cat-header { background: #374151; }
+
+  .backend  .chip-icon { background: #ede9fe; }
+  .causal   .chip-icon { background: #fee2e2; }
+  .fairness .chip-icon { background: #d1fae5; }
+  .ai       .chip-icon { background: #fef3c7; }
+  .frontend .chip-icon { background: #dbeafe; }
+  .infra    .chip-icon { background: #f3f4f6; }
+</style>
+</head>
+<body>
+
+<h1>Technologies Used — Aition</h1>
+<p class="subtitle">Causal AI Fairness Engine · Google Solution Challenge 2026</p>
+
+<div class="grid">
+
+  <!-- Backend -->
+  <div class="category backend">
+    <div class="cat-header">⚙ Backend</div>
+    <div class="cat-body">
+      <div class="chip">
+        <div class="chip-icon">🚀</div>
+        <div>
+          <div class="chip-name">FastAPI + Uvicorn</div>
+          <div class="chip-desc">REST API framework · async · auto-docs at /docs</div>
+        </div>
+      </div>
+      <div class="chip">
+        <div class="chip-icon">🐍</div>
+        <div>
+          <div class="chip-name">Python 3.11</div>
+          <div class="chip-desc">pandas 2.2.3 · numpy 1.26 · scikit-learn 1.3</div>
+        </div>
+      </div>
+      <div class="chip">
+        <div class="chip-icon">🔐</div>
+        <div>
+          <div class="chip-name">python-dotenv</div>
+          <div class="chip-desc">Environment variable management · GEMINI_API_KEY</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Causal AI -->
+  <div class="category causal">
+    <div class="cat-header">🔗 Causal AI</div>
+    <div class="cat-body">
+      <div class="chip">
+        <div class="chip-icon">🧠</div>
+        <div>
+          <div class="chip-name">DoWhy 0.11</div>
+          <div class="chip-desc">Causal graph discovery · PC algorithm · backdoor criterion</div>
+        </div>
+      </div>
+      <div class="chip">
+        <div class="chip-icon">📐</div>
+        <div>
+          <div class="chip-name">do-calculus</div>
+          <div class="chip-desc">P(Y|do(A=a)) causal effect estimation via backdoor linear regression</div>
+        </div>
+      </div>
+      <div class="chip">
+        <div class="chip-icon">🔍</div>
+        <div>
+          <div class="chip-name">Proxy Detection</div>
+          <div class="chip-desc">Group mean difference · 3 paths found · standard tools found 0</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Fairness -->
+  <div class="category fairness">
+    <div class="cat-header">⚖ Fairness Metrics</div>
+    <div class="cat-body">
+      <div class="chip">
+        <div class="chip-icon">📊</div>
+        <div>
+          <div class="chip-name">AIF360 0.6</div>
+          <div class="chip-desc">BinaryLabelDatasetMetric · Demographic Parity Difference</div>
+        </div>
+      </div>
+      <div class="chip">
+        <div class="chip-icon">📈</div>
+        <div>
+          <div class="chip-name">Impossibility Surface</div>
+          <div class="chip-desc">17-step threshold sweep · Pareto frontier DPD vs EOD</div>
+        </div>
+      </div>
+      <div class="chip">
+        <div class="chip-icon">✂</div>
+        <div>
+          <div class="chip-name">Surgical Debiasing</div>
+          <div class="chip-desc">Proxy removal + sample reweighting · 65.4% bias reduction</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- AI Reports -->
+  <div class="category ai">
+    <div class="cat-header">✨ AI Reports</div>
+    <div class="cat-body">
+      <div class="chip">
+        <div class="chip-icon">💬</div>
+        <div>
+          <div class="chip-name">Gemini 2.5 Flash</div>
+          <div class="chip-desc">Plain-language audit reports · temperature 0.2 · Markdown output</div>
+        </div>
+      </div>
+      <div class="chip">
+        <div class="chip-icon">🔌</div>
+        <div>
+          <div class="chip-name">google-genai SDK</div>
+          <div class="chip-desc">Python client · from google import genai · fallback on error</div>
+        </div>
+      </div>
+      <div class="chip">
+        <div class="chip-icon">👥</div>
+        <div>
+          <div class="chip-name">Two-Audience Output</div>
+          <div class="chip-desc">Technical report for ML engineers · plain language for HR directors</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Frontend -->
+  <div class="category frontend">
+    <div class="cat-header">🖥 Frontend</div>
+    <div class="cat-body">
+      <div class="chip">
+        <div class="chip-icon">⚛</div>
+        <div>
+          <div class="chip-name">React 18 + CRACO</div>
+          <div class="chip-desc">Component-based UI · hooks · React Router v6</div>
+        </div>
+      </div>
+      <div class="chip">
+        <div class="chip-icon">🎨</div>
+        <div>
+          <div class="chip-name">Custom SVG Graph</div>
+          <div class="chip-desc">Causal graph · colour-coded nodes · no D3 dependency</div>
+        </div>
+      </div>
+      <div class="chip">
+        <div class="chip-icon">🔷</div>
+        <div>
+          <div class="chip-name">Lucide React</div>
+          <div class="chip-desc">Icon library · shadcn/ui components · Sora font</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Infra & Testing -->
+  <div class="category infra">
+    <div class="cat-header">🏗 Infra & Testing</div>
+    <div class="cat-body">
+      <div class="chip">
+        <div class="chip-icon">▲</div>
+        <div>
+          <div class="chip-name">Vercel + Docker</div>
+          <div class="chip-desc">Frontend on Vercel · backend via Dockerfile · Python 3.11</div>
+        </div>
+      </div>
+      <div class="chip">
+        <div class="chip-icon">🧪</div>
+        <div>
+          <div class="chip-name">pytest + Hypothesis</div>
+          <div class="chip-desc">19 tests passing · property-based testing · 100 examples each</div>
+        </div>
+      </div>
+      <div class="chip">
+        <div class="chip-icon">📦</div>
+        <div>
+          <div class="chip-name">python-pptx</div>
+          <div class="chip-desc">Prototype deck generation · programmatic slide creation</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+</body>
+</html>

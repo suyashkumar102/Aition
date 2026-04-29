@@ -2,7 +2,6 @@
   "name": "themis-frontend",
   "version": "1.0.0",
   "private": true,
-  "proxy": "http://localhost:8000",
   "dependencies": {
     "@craco/craco": "^7.1.0",
     "lucide-react": "^0.400.0",
