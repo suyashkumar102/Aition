@@ -678,9 +678,9 @@ def run_surgical_debiasing(
     fairness_definition: str,
 ) -> DebiasingResult:
     """
-    Baseline: all 5 features. Surgical correction:
-      - Remove college_graduation_year_gap and neighborhood_quality (proxy removal)
-      - Reweight samples to equalise employment_gap distribution across age groups
+    Baseline: all 5 features. Surgical correction differs by fairness definition:
+    - demographic_parity: remove all proxy features, maximise rate equality
+    - equalized_odds: remove proxies + apply threshold calibration per group
     """
     df_enc = encode_all(df)
     all_features = ["experience_years", "test_score", "college_graduation_year_gap",
@@ -696,9 +696,21 @@ def run_surgical_debiasing(
     bias_before = abs(y_pred_before[age == 1].mean() - y_pred_before[age == 0].mean())
     accuracy_before = (y_pred_before == y).mean()
 
-    # Remove both proxy columns; reweight for employment_gap
-    proxy_features = ["experience_years", "test_score", "employment_gap"]
-    weights = compute_reweighting(df_enc, age)
+    if fairness_definition == "demographic_parity":
+        # Strategy: remove all proxy features, no reweighting
+        # Goal: equalise approval rates across groups
+        proxy_features = ["experience_years", "test_score"]
+        strategy = "proxy_removal"
+        modified = ["college_graduation_year_gap", "neighborhood_quality", "employment_gap"]
+        weights = np.ones(len(df_enc))
+    else:
+        # equalized_odds: remove hard proxies, reweight for employment_gap
+        # Goal: equalise TPR and FPR across groups (stricter, higher accuracy cost)
+        proxy_features = ["experience_years", "test_score", "employment_gap"]
+        strategy = "proxy_removal+reweighting"
+        modified = ["college_graduation_year_gap", "neighborhood_quality", "employment_gap"]
+        weights = compute_reweighting(df_enc, age)
+
     X_proxy_scaled = StandardScaler().fit_transform(df_enc[proxy_features].values)
     clf_after = LogisticRegression(random_state=42).fit(X_proxy_scaled, y, sample_weight=weights)
     y_pred_after = clf_after.predict(X_proxy_scaled)
@@ -714,8 +726,8 @@ def run_surgical_debiasing(
 
     return DebiasingResult(
         selected_fairness_definition=fairness_definition,
-        strategy_applied="proxy_removal",
-        variables_modified=["college_graduation_year_gap", "neighborhood_quality", "employment_gap"],
+        strategy_applied=strategy,
+        variables_modified=modified,
         bias_index_before=round(float(bias_before), 4),
         bias_index_after=round(float(bias_after), 4),
         accuracy_before=round(float(accuracy_before), 4),
