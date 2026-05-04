@@ -10,6 +10,7 @@ import Sidebar from "./Sidebar";
 import CausalGraph from "./CausalGraph";
 import { runAudit, runDebias } from "../api";
 
+// v2 - all tabs wired
 function fmt(n, dp = 4) {
   return typeof n === "number" ? n.toFixed(dp) : "—";
 }
