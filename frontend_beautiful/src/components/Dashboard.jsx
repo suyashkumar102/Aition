@@ -3,14 +3,13 @@ import {
   Upload, Database, AlertTriangle, Shield, ShieldAlert,
   Check, Share2, Users, Tag, Lightbulb, HelpCircle,
   ArrowRight, BarChart3, Sparkles, Loader2, FileText,
-  Home, ShieldCheck, CheckCircle2, Settings as SettingsIcon,
-  Download, RefreshCw, Info, TrendingDown,
+  Info, Download,
 } from "lucide-react";
 import Sidebar from "./Sidebar";
 import CausalGraph from "./CausalGraph";
 import { runAudit, runDebias } from "../api";
 
-// v2 - all tabs wired
+// v2 - all tabs wired - build trigger
 function fmt(n, dp = 4) {
   return typeof n === "number" ? n.toFixed(dp) : "—";
 }
@@ -426,7 +425,6 @@ function TabDataset({ auditData }) {
   const causal = auditData?.causal_audit;
   const std    = auditData?.standard_audit;
   const graph  = auditData?.graph_data;
-  const cols   = graph?.nodes?.map(n => ({ name: n.label, id: n.id, type: n.type })) ?? [];
 
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
